@@ -14,10 +14,11 @@
       margin: 0;
       font-family: "Segoe UI", "Helvetica Neue", sans-serif;
       background: linear-gradient(135deg, #b9c96a, #d8e9a8);
+      padding: 0;
     }
 
     header {
-      background-color: #2c3e50;
+      background-color: #91003c;
       color: white;
       padding: 16px;
       font-size: 20px;
@@ -40,7 +41,7 @@
       padding: 8px 12px;
       font-size: 16px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 16px;
       transition: all 0.3s ease;
     }
 
@@ -51,8 +52,9 @@
     }
 
     #map {
-      height: calc(100dvh - 128px); /* header + searchContainerの高さ */
+      height: calc(100vh - 112px); /* header + searchContainerの高さ */
       width: 100%;
+      background-color: #b9c96a;
     }
 
     @media (max-width: 600px) {
@@ -70,12 +72,76 @@
         padding: 6px 10px;
       }
     }
+    .leaflet-control-zoom {
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: none !important;
+    }
+    .leaflet-control-zoom a {
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      font-size: 18px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      box-shadow: none !important;
+    }
+    .leaflet-control-zoom-in {
+      border-top-left-radius: 50%;
+      border-top-right-radius: 50%;
+      border-top: 1px solid #ccc; /* 上枠は必要 */
+    }
+    .leaflet-control-zoom-out {
+      border-bottom-left-radius: 50%;
+      border-bottom-right-radius: 50%;
+    }
+    .leaflet-control-zoom a:last-child {
+      border-bottom: none;
+    }
+
+    #loading {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #ccc;
+      border-top-color: #91003c; /* 回転部分の色 */
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    .loading-text {
+      font-size: 18px;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
-  <header>京都工芸繊維大学 松ヶ崎キャンパス地図</header>
+  <header>KIT マッピン</header>
   <div id="searchContainer">
     <input type="text" id="search" placeholder="例：1号館、0111、NP11 など" />
+  </div>
+  <div id="map"></div>
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">読み込み中...</div>
   </div>
   <div id="map"></div>
 
@@ -95,16 +161,123 @@
     map.fitBounds(bounds);
     map.setView([imageHeight / 2, imageWidth / 2], -1);
 
+    map.on('load', function() {
+      const loadingDiv = document.getElementById('loading');
+      if (loadingDiv) loadingDiv.style.display = 'none';
+    });
+
+    map.fire('load');
+
+
     const buildings = {
       "1号館": [417, 507],
       "2号館": [454, 421],
-      // 以下省略。元の buildings を貼ってください。
+      "3号館": [211, 490],
+      "4号館": [162, 370],
+      "5号館": [261, 370],
+      "6号館": [171, 288],
+      "7号館": [258, 302],
+      "8号館": [209, 251],
+      "9号館": [210, 311],
+      "10号館": [325, 229],
+      "11号館": [372, 250],
+      "12号館": [417, 221],
+      "13号館": [385, 310],
+      "14号館": [477, 180],
+      "15号館": [522, 180],
+      "16号館": [518, 272],
+      "17号館": [436, 108],
+      "18号館": [317, 106],
+      "19号館": [275, 111],
+      "図書館": [438, 772],
+      "附属図書館": [438, 772],
+      "体育館": [404, 922],
+      "プール": [470, 960],
+      "センターホール": [316, 485],
+      "大学会館": [168, 179],
+      "KIT HOUSE": [263, 177],
+      "食堂": [263, 177],
+      "オルタス": [263, 177],
+      "武道場": [338, 905],
+      "トレーニング室": [338, 935],
+      "弓道場": [430, 973],
+      "KIT SHOP": [263, 177],
+      "美術工芸資料館": [334, 387],
+      "西実験棟": [201, 111],
+      "北講義室": [503, 358],
+      "北部講義室棟": [503, 358],
+      "西部講義室棟": [359, 106],
+      "東部講義室棟": [335, 857],
+      "東1号館": [332, 718],
+      "東2号館": [334, 808],
+      "東3号館": [437, 614],
+      "東4号館": [437, 665],
+      "ノートルダム館": [437, 614],
+      "60周年記念館": [327, 602],
+      "KYOTO Design Lab": [301, 760],
+      "KYOTODesignLab": [301, 760],
+      "実習棟": [480, 257],
+      "情報基盤センター": [217, 372],
+      "工繊会館": [609, 498],
+      "アイソトープセンター": [465, 360],
+      "環境科学センター": [376, 195],
+      "廃棄物処理場": [479, 306]
     };
 
     const classrooms = {
       "0111": { building: "1号館", floor: "1階", coord: [399, 474] },
       "0121": { building: "1号館", floor: "2階", coord: [399, 474] },
-      // 以下省略。元の classrooms を貼ってください。
+      "0112": { building: "1号館", floor: "1階", coord: [423, 475] },
+      "0122": { building: "1号館", floor: "2階", coord: [423, 475] },
+      "0223": { building: "2号館", floor: "2階", coord: [439, 423] },
+      "0211": { building: "2号館", floor: "1階", coord: [424, 399] },
+      "0222": { building: "2号館", floor: "2階", coord: [453, 423] },
+      "K101": { building: "東3号館", floor: "1階", coord: [431, 604] },
+      "K301": { building: "東3号館", floor: "3階", coord: [431, 604] },
+      "K201": { building: "東3号館", floor: "2階", coord: [431, 604] },
+      "K302": { building: "東3号館", floor: "3階", coord: [425, 625] },
+      "K202": { building: "東3号館", floor: "2階", coord: [425, 625] },
+      "K303": { building: "東3号館", floor: "3階", coord: [440, 626] },
+      "K203": { building: "東3号館", floor: "2階", coord: [440, 626] },
+      "E111": { building: "東1号館", floor: "1階", coord: [331, 677] },
+      "E121": { building: "東1号館", floor: "2階", coord: [331, 677] },
+      "EP21": { building: "東部講義室棟", floor: "2階", coord: [335, 859] },
+      "N105": { building: "15号館", floor: "1階", coord: [516, 192] },
+      "15N": { building: "15号館", floor: "2階", coord: [516, 192] },
+      "NP11": { building: "北部講義室棟", floor: "1階", coord: [503, 365] },
+      "NP12": { building: "北部講義室棟", floor: "1階", coord: [502, 352] },
+      "NP21": { building: "北部講義室棟", floor: "2階", coord: [503, 358] },
+      "51S": { building: "5号館", floor: "2階", coord: [258, 358] },
+      "1211": { building: "12号館", floor: "1階", coord: [423, 255] },
+      "WP11": { building: "西部講義室棟", floor: "1階", coord: [355, 110] },
+      "WP21": { building: "西部講義室棟", floor: "2階", coord: [355, 110] },
+      "WP12": { building: "西部講義室棟", floor: "1階", coord: [355, 100] },
+      "WP22": { building: "西部講義室棟", floor: "2階", coord: [355, 100] },
+      "1041": { building: "10号館", floor: "4階", coord: [318, 253] },
+      "WL21": { building: "西実験棟", floor: "2階", coord: [178, 105] },
+      "WL22": { building: "西実験棟", floor: "2階", coord: [207, 104] },
+      "WL23": { building: "西実験棟", floor: "2階", coord: [183, 119] },
+      "WL24": { building: "西実験棟", floor: "2階", coord: [217, 87] },
+      "1131": { building: "11号館", floor: "3階", coord: [388, 251] },
+      "1132": { building: "11号館", floor: "3階", coord: [367, 251] },
+      "1141": { building: "11号館", floor: "4階", coord: [383, 251] },
+      "1142": { building: "11号館", floor: "4階", coord: [355, 251] },
+      "0611": { building: "6号館", floor: "1階", coord: [165, 281] },
+      "0612": { building: "6号館", floor: "1階", coord: [165, 302] },
+      "CIS": { building: "情報基盤センター", floor: "1階", coord: [226, 364] },
+      "0811": { building: "8号館", floor: "1階", coord: [192, 238] },
+      "0822": { building: "8号館", floor: "2階", coord: [192, 238] },
+      "0812": { building: "8号館", floor: "1階", coord: [194, 258] },
+      "0821": { building: "8号館", floor: "2階", coord: [178, 241] },
+      "0311": { building: "3号館", floor: "1階", coord: [214, 446] },
+      "0331": { building: "3号館", floor: "3階", coord: [214, 446] },
+      "0312": { building: "3号館", floor: "1階", coord: [160, 451] },
+      "0313": { building: "3号館", floor: "1階", coord: [250, 497] },
+      "0321": { building: "3号館", floor: "2階", coord: [214, 431] },
+      "0322": { building: "3号館", floor: "2階", coord: [203, 457] },
+      "0323": { building: "3号館", floor: "2階", coord: [226, 458] },
+      "入試課": { building: "3号館", floor: "1階", coord: [265, 446] }
+
     };
 
     let marker;
