@@ -9,6 +9,12 @@
     * {
       box-sizing: border-box;
     }
+    html, body {
+      height: auto;
+      min-height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       margin: 0;
@@ -143,9 +149,7 @@
     <div class="spinner"></div>
     <div class="loading-text">読み込み中...</div>
   </div>
-  <div id="map"></div>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const map = L.map('map', {
       crs: L.CRS.Simple,
@@ -220,8 +224,8 @@
       "情報基盤センター": [217, 372],
       "工繊会館": [609, 498],
       "アイソトープセンター": [465, 360],
-      "環境科学センター": [376, 195],
-      "廃棄物処理場": [479, 306]
+      "環境科学センター": [376, 195]
+
     };
 
     const classrooms = {
@@ -279,6 +283,40 @@
       "入試課": { building: "3号館", floor: "1階", coord: [265, 446] }
 
     };
+　
+    const landmarks = {
+      "リンゴ": [444, 148],
+      "りんご": [444, 148],
+      "パパイヤ": [306, 148],
+      "ブルーベリー": [149, 232],
+      "ナシ": [152, 322],
+      "なし": [152, 322],
+      "バナナ": [445, 317],
+      "ライチ": [285, 339],
+      "ブドウ": [522, 340],
+      "ぶどう": [522, 340],
+      "スイカ": [392, 406],
+      "すいか": [392, 406],
+      "マンゴー": [282, 432],
+      "パイン": [194, 439],
+      "メロン": [393, 527],
+      "イチジク": [357, 526],
+      "いちじく": [357, 526],
+      "モモ": [264, 522],
+      "もも": [264, 522],
+      "イチゴ": [388, 631],
+      "いちご": [388, 631],
+      "ミカン": [412, 714],
+      "みかん": [412, 714],
+      "キウイ": [400, 800],
+      "カキ": [375, 800],
+      "かき": [375, 800],
+      "レモン": [311, 860],
+      "マスカット": [398, 864],
+      "サクランボ": [380, 892],
+      "さくらんぼ": [380, 892]
+    };
+
 
     let marker;
 
@@ -297,7 +335,11 @@
         targetCoord = info.coord || buildings[buildingName];
       } else if (buildings[name]) {
         targetCoord = buildings[name];
+      } else if (landmarks[name]) {
+        label = "現在地：" + name;
+        targetCoord = landmarks[name];
       }
+
 
       if (targetCoord) {
         const [y, x] = targetCoord;
